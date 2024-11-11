@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KingzNotes</title>
+  <link rel="icon" href="src/icon.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kalnia+Glaze:wght@100..700&family=Rubik+Wet+Paint&family=Slabo+27px&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #6389ce, #f0e4d7);
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Slabo 27px', serif;
+      color: #333;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .row > .col-md-4 {
+      max-width: 20%;
+      flex: 0 0 20%;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: grey;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .note-input {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 80%;
+     
+    }
+    .font {
+      font-family: 'Rubik Wet Paint', cursive;
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: #101011;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .fonts{
+      font-family: 'Rubik Wet Paint', cursive;
+      font-size: 20px;
+      padding: 10px 20px;
+    }
+    .font:hover {
+      background-color: #f6fa19;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="fonts">📝 KingzNotes</h1>
+     
+    </header>
+    <div class="note-input">
+      <textarea id="newNote" placeholder="Type your note here..." ></textarea>
+      <button class="font" id="addNoteBtn">ADD</button>
+    </div>
+    <div id="notes-container" class="container"></div>
+  </div>
+  <script>
+    window.addEventListener('load', () => {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      savedNotes.forEach((note, index) => createNoteElement(note, index));
+
+      
+    });
+    
+
+    document.getElementById('addNoteBtn').addEventListener('click', () => {
+      const noteText = document.getElementById('newNote').value.trim();
+      if (noteText !== '') {
+        const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+        savedNotes.push({ text: noteText, completed: false });
+        localStorage.setItem('notes', JSON.stringify(savedNotes));
+        createNoteElement({ text: noteText, completed: false }, savedNotes.length - 1);
+        document.getElementById('newNote').value = '';
+      }
+    });
+
+    function createNoteElement(note, index) {
+      const container = document.getElementById('notes-container');
+
+      // Create row element for every set of 5 cards
+      if (index % 5 === 0) {
+        const row = document.createElement('div');
+        row.classList.add('row');
+        container.appendChild(row);
+      }
+
+      const row = container.lastElementChild;
+      
+      const cardCol = document.createElement('div');
+      cardCol.classList.add('col-md-4');
+
+      const card = document.createElement('div');
+      card.classList.add('card');
+
+      const cardBody = document.createElement('div');
+      cardBody.classList.add('card-body');
+
+      const cardTitle = document.createElement('h5');
+      cardTitle.classList.add('card-title');
+      cardTitle.innerText = `Note ${index + 1}`;
+
+      const cardText = document.createElement('p');
+      cardText.classList.add('card-text');
+      if (note.completed) {
+        cardText.classList.add('completed');
+      }
+      cardText.innerText = note.text;
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.classList.add('mr-2');
+      checkbox.checked = note.completed;
+      checkbox.onclick = () => toggleComplete(index);
+
+      const editButton = document.createElement('button');
+      editButton.classList.add('btn', 'btn-primary', 'mr-2');
+      editButton.innerText = 'Edit';
+      editButton.onclick = () => editNoteElement(index);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.classList.add('btn', 'btn-danger');
+      deleteButton.innerText = 'Delete';
+      deleteButton.onclick = () => deleteNoteElement(index);
+
+      cardBody.appendChild(checkbox);
+      cardBody.appendChild(cardTitle);
+      cardBody.appendChild(cardText);
+      cardBody.appendChild(editButton);
+      cardBody.appendChild(deleteButton);
+      card.appendChild(cardBody);
+      cardCol.appendChild(card);
+      row.appendChild(cardCol);
+    }
+
+    function toggleComplete(index) {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      savedNotes[index].completed = !savedNotes[index].completed;
+      localStorage.setItem('notes', JSON.stringify(savedNotes));
+      location.reload();
+    }
+
+    function editNoteElement(index) {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      const newNote = prompt('Edit your note:', savedNotes[index].text);
+      if (newNote !== null && newNote.trim() !== '') {
+        savedNotes[index].text = newNote.trim();
+        localStorage.setItem('notes', JSON.stringify(savedNotes));
+        location.reload();
+      }
+    }
+
+    function deleteNoteElement(index) {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      savedNotes.splice(index, 1);
+      localStorage.setItem('notes', JSON.stringify(savedNotes));
+      location.reload();
+    }
+
+    
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrap.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
